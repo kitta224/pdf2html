@@ -446,8 +446,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('shared') === 'true') {
         showStatus('共有されたPDFファイルを読み込みました。処理を開始してください。');
+        // デバッグ情報
+        console.log('Shared file detected via URL params');
     } else if (urlParams.get('error') === 'share_failed') {
         showStatus('共有ファイルの処理に失敗しました。');
+        console.error('Share target processing failed');
+    }
+
+    // Service Workerメッセージの処理（共有ファイル用）
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SHARED_FILE_RECEIVED') {
+                console.log('Shared file received via Service Worker:', event.data.file);
+                showStatus('共有ファイルを受信しました。');
+            }
+        });
     }
 
     // 停止ボタンのイベントリスナー
