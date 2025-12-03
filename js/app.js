@@ -496,7 +496,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isVision = visionToggle.checked;
         const isStreaming = streamingToggle.checked;
-        const apiUrl = apiUrlInput.value.trim() || 'http://127.0.0.1:1234';
+        let apiUrl = apiUrlInput.value.trim() || 'http://127.0.0.1:1234';
+
+        // API URLがプロトコルを含まない場合、https://を付ける
+        if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+            apiUrl = 'https://' + apiUrl;
+        }
+
         let hasReasoning = false;
 
         try {
