@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共有ファイル処理中 - PDF to HTML Converter</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .loading {
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 PDF to HTML</h1>
+        <p>共有されたPDFファイルを処理しています...</p>
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+        <p>しばらくお待ちください</p>
+    </div>
+
+    <script>
+        // 共有されたファイルを処理
+        window.addEventListener('load', async () => {
+            try {
+                const formData = new FormData();
+
+                // POSTデータからファイルを取得
+                if (window.location.search) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    // URLパラメータ経由の場合（将来の拡張用）
+                }
+
+                // メインアプリにリダイレクト
+                const currentUrl = new URL(window.location);
+                const baseUrl = `${currentUrl.protocol}//${currentUrl.host}`;
+
+                // 共有データをメインアプリに渡す
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    // Service Worker経由でデータを渡す
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'SHARED_FILE',
+                        url: baseUrl,
+                        timestamp: Date.now()
+                    });
+                }
+
+                // メインアプリにリダイレクト
+                window.location.href = `${baseUrl}/?shared=true&t=${Date.now()}`;
+
+            } catch (error) {
+                console.error('共有ファイル処理エラー:', error);
+                // エラーが発生した場合もメインアプリにリダイレクト
+                const currentUrl = new URL(window.location);
+                const baseUrl = `${currentUrl.protocol}//${currentUrl.host}`;
+                window.location.href = `${baseUrl}/?error=share_failed`;
+            }
+        });
+
+        // Service Workerからのメッセージを処理
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'SHARE_READY') {
+                    // 共有データが準備完了
+                    console.log('共有データ準備完了');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

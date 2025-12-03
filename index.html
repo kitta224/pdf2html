@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to HTML Converter</title>
+    <meta name="description" content="PDFからHTMLを生成するAI搭載コンバーター">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PDF2HTML">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF to HTML Converter</h1>
+        <div class="api-settings">
+            <label for="apiUrl">API エンドポイント:</label>
+            <input type="text" id="apiUrl" value="http://127.0.0.1:1234" placeholder="http://127.0.0.1:1234">
+        </div>
+        <div class="controls">
+            <input type="file" id="pdfInput" accept=".pdf">
+            <div class="mode-controls">
+                <label class="toggle">
+                    <input type="checkbox" id="streamingToggle" checked>
+                    <span class="slider"></span>
+                    ストリーミングモード
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="visionToggle">
+                    <span class="slider"></span>
+                    Visionモデルモード
+                </label>
+            </div>
+        </div>
+        <div class="button-controls">
+            <button id="processBtn">処理</button>
+            <button id="stopBtn" style="display:none; background-color: #dc3545;">停止</button>
+        </div>
+        <div id="status" class="status" style="display:none;"></div>
+        <details id="textContainer" style="display:none;">
+            <summary>抽出されたテキスト</summary>
+            <div id="extractedText" class="preview-content"></div>
+        </details>
+        <details id="imageContainer" style="display:none;">
+            <summary>変換された画像</summary>
+            <div id="imagePreview" class="image-preview"></div>
+        </details>
+        <details id="streamingContainer" style="display:none;">
+            <summary>AI思考プロセス</summary>
+            <div id="streamingOutput" class="streaming-content"></div>
+        </details>
+        <details id="infoContainer" style="display:none;">
+            <summary>処理情報</summary>
+            <div id="info" class="info-content"></div>
+        </details>
+        <details id="previewContainer" style="display:none;">
+            <summary>生成されたHTMLプレビュー</summary>
+            <div id="preview" class="preview-content"></div>
+        </details>
+        <button id="downloadBtn" style="display:none;">ダウンロード</button>
+    </div>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
