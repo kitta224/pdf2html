@@ -43,11 +43,12 @@ self.addEventListener('fetch', (event) => {
           const formData = await event.request.formData();
           const file = formData.get('file');
 
-          if (file && file.type === 'application/pdf') {
-            // share-target.htmlにリダイレクト
+          if (file) {
+            // すべてのファイルタイプを受け入れる（一時的）
+            console.log('Shared file received:', file.name, file.type, file.size);
             return Response.redirect('/share-target.html?shared=true', 302);
           } else {
-            return new Response('Invalid file type', { status: 400 });
+            return new Response('No file provided', { status: 400 });
           }
         } catch (error) {
           console.error('Share target error:', error);

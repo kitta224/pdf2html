@@ -15,7 +15,7 @@
       "files": [
         {
           "name": "file",
-          "accept": ["application/pdf", ".pdf"]
+          "accept": ["*/*"]
         }
       ]
     }
