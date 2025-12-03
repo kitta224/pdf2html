@@ -58,26 +58,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 外部リソース（CDNなど）はネットワーク優先
+  // 外部リソース（CDNなど）はネットワーク優先（キャッシュしない）
   if (event.request.url.includes('cdnjs.cloudflare.com') ||
-      event.request.url.includes('fonts.googleapis.com')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // 成功したらランタイムキャッシュ
-          if (response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // ネットワーク失敗時はキャッシュから
-          return caches.match(event.request);
-        })
-    );
+      event.request.url.includes('fonts.googleapis.com') ||
+      event.request.url.includes('chrome-extension://')) {
+    return fetch(event.request);
   } else {
     // 内部リソースはキャッシュ優先
     event.respondWith(
