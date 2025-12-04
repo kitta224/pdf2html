@@ -142,25 +142,17 @@ async function generateHtmlFromImages(images, isStreaming = false, onChunk = nul
                             if (parsed.model) {
                                 model = parsed.model;
                                 // モデル情報を更新
-                                const modelElement = document.querySelector('#info p:nth-child(1)');
-                                if (modelElement) {
-                                    modelElement.innerHTML = `<strong>モデル:</strong> ${model}`;
-                                }
+                                modelInfo.textContent = `モデル: ${model}`;
+                                modelInfo.style.display = 'block';
                             }
                             if (parsed.usage) {
                                 usage = parsed.usage;
-                                // 使用量情報を更新（最終結果）
-                                const elapsed = (Date.now() - Date.now()) / 1000; // 簡易的な計算
-                                const tokensPerSec = (usage.completion_tokens / Math.max(elapsed, 0.1)).toFixed(2);
-                                const info = document.getElementById('info');
-                                info.innerHTML = `
-                                    <p><strong>モデル:</strong> ${model || '不明'}</p>
-                                    <p><strong>プロンプトトークン:</strong> ${usage.prompt_tokens}</p>
-                                    <p><strong>生成トークン:</strong> ${usage.completion_tokens}</p>
-                                    <p><strong>総トークン:</strong> ${usage.total_tokens}</p>
-                                    <p><strong>処理時間:</strong> ${elapsed.toFixed(1)}s</p>
-                                    <p><strong>トークン/秒:</strong> ${tokensPerSec}</p>
-                                `;
+                                console.log('Streaming usage received:', usage); // デバッグ用
+                                // モデル情報を最終更新
+                                if (model) {
+                                    modelInfo.textContent = `モデル: ${model}`;
+                                    modelInfo.style.display = 'block';
+                                }
                             }
                         } catch (e) {
                             // JSONパースエラーは無視
@@ -186,6 +178,7 @@ async function generateHtmlFromImages(images, isStreaming = false, onChunk = nul
             };
         } else {
             const data = await response.json();
+            console.log('Non-streaming API response:', data); // デバッグ用
             let html = data.choices[0].message.content;
 
             // メタタグ（thinkingなど）に囲まれた範囲を削除
@@ -217,7 +210,7 @@ async function generateHtmlFromImages(images, isStreaming = false, onChunk = nul
  * @returns {Promise<object>} 生成されたHTMLとメタデータ
  */
 async function generateHtmlFromText(text, isStreaming = false, onChunk = null, abortSignal = null, apiUrl = 'http://127.0.0.1:1234') {
-    const systemPrompt = "あなたはテキストをモバイルフレンドリーなHTMLに変換するエキスパートです。レスポンシブデザイン、アクセシビリティ、読みやすさを重視し、構造化されたHTMLを出力します。注意書きなどは別の色を使用して、回答はHTMLコードのみとしてください。テキストデータから構造を予測し、表組みにすべきところは表組みにしてください。その際モバイル用に最適化するため、収まりきらない物は横にスクロール可能な状態にしてください。ユーザーはHTML化してほしいテキストをのみ提供しますが、余計な空白などが入っている可能性があります。絶対に省略しないでください。";
+    const systemPrompt = "あなたはテキストをモバイルフレンドリーなHTMLに変換するエキスパートです。レスポンシブデザイン、アクセシビリティ、読みやすさを重視し、構造化されたHTMLを出力します。注意書きなどは別の色を使用して、回答はHTMLコードのみとしてください。テキストデータから構造を予測して復元し、表組みにすべきところは表組みにしてください。その際モバイル用に最適化するため、収まりきらない物は横にスクロール可能な状態にしてください。ユーザーはHTML化してほしいテキストをのみ提供しますが、余計な空白などが入っている可能性があります。絶対に省略しないでください。";
     const fullPrompt = `${text}`;
 
     try {
@@ -274,24 +267,16 @@ async function generateHtmlFromText(text, isStreaming = false, onChunk = null, a
                             if (parsed.model) {
                                 model = parsed.model;
                                 // モデル情報を更新
-                                const modelElement = info.querySelector('p:nth-child(1)');
-                                if (modelElement) {
-                                    modelElement.innerHTML = `<strong>モデル:</strong> ${model}`;
-                                }
+                                modelInfo.textContent = `モデル: ${model}`;
+                                modelInfo.style.display = 'block';
                             }
                             if (parsed.usage) {
                                 usage = parsed.usage;
-                                // 使用量情報を更新（最終結果）
-                                const elapsed = (Date.now() - startTime) / 1000;
-                                const tokensPerSec = (usage.completion_tokens / elapsed).toFixed(2);
-                                info.innerHTML = `
-                                    <p><strong>モデル:</strong> ${model || '不明'}</p>
-                                    <p><strong>プロンプトトークン:</strong> ${usage.prompt_tokens}</p>
-                                    <p><strong>生成トークン:</strong> ${usage.completion_tokens}</p>
-                                    <p><strong>総トークン:</strong> ${usage.total_tokens}</p>
-                                    <p><strong>処理時間:</strong> ${elapsed.toFixed(1)}s</p>
-                                    <p><strong>トークン/秒:</strong> ${tokensPerSec}</p>
-                                `;
+                                // モデル情報を最終更新
+                                if (model) {
+                                    modelInfo.textContent = `モデル: ${model}`;
+                                    modelInfo.style.display = 'block';
+                                }
                             }
                         } catch (e) {
                             // JSONパースエラーは無視
@@ -319,6 +304,7 @@ async function generateHtmlFromText(text, isStreaming = false, onChunk = null, a
             const data = await response.json();
             let html = data.choices[0].message.content;
 
+            console.log('Vision API non-streaming response:', data); // デバッグ用
             // メタタグ（thinkingなど）に囲まれた範囲を削除
             html = html.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
             html = html.replace(/<think>[\s\S]*?<\/think>/gi, '');
@@ -419,8 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const streamingContainer = document.getElementById('streamingContainer');
     const imagePreview = document.getElementById('imagePreview');
     const imageContainer = document.getElementById('imageContainer');
-    const info = document.getElementById('info');
-    const infoContainer = document.getElementById('infoContainer');
+    const modelInfo = document.getElementById('modelInfo');
     const preview = document.getElementById('preview');
     const previewContainer = document.getElementById('previewContainer');
     const downloadBtn = document.getElementById('downloadBtn');
@@ -474,9 +459,9 @@ document.addEventListener('DOMContentLoaded', () => {
             textContainer.style.display = 'none';
             streamingContainer.style.display = 'none';
             imageContainer.style.display = 'none';
-            infoContainer.style.display = 'none';
             previewContainer.style.display = 'none';
             downloadBtn.style.display = 'none';
+            modelInfo.style.display = 'none';
 
             processBtn.disabled = false;
             processBtn.textContent = '処理';
@@ -495,13 +480,13 @@ document.addEventListener('DOMContentLoaded', () => {
         textContainer.style.display = 'none';
         streamingContainer.style.display = 'none';
         imageContainer.style.display = 'none';
-        infoContainer.style.display = 'none';
         previewContainer.style.display = 'none';
         downloadBtn.style.display = 'none';
+        modelInfo.style.display = 'none';
         extractedText.textContent = '';
         streamingOutput.textContent = '';
         imagePreview.innerHTML = '';
-        info.innerHTML = '';
+        modelInfo.textContent = '';
         shadowRoot.innerHTML = '';
 
         processBtn.disabled = true;
@@ -549,22 +534,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     streamingOutput.textContent = '';
                     streamingContainer.style.display = 'block';
-                    info.innerHTML = `
-                        <p><strong>モデル:</strong> 読み込み中...</p>
-                        <p><strong>プロンプトトークン:</strong> -</p>
-                        <p><strong>生成トークン:</strong> -</p>
-                        <p><strong>総トークン:</strong> -</p>
-                        <p><strong>処理時間:</strong> 0.0s</p>
-                        <p><strong>トークン/秒:</strong> -</p>
-                    `;
-                    infoContainer.style.display = 'block';
 
                     const startTime = Date.now();
+                    // 経過時間をリアルタイム更新（モデル情報に表示）
                     const updateInterval = setInterval(() => {
                         const elapsed = (Date.now() - startTime) / 1000;
-                        const timeElement = info.querySelector('p:nth-child(5)');
-                        if (timeElement) {
-                            timeElement.innerHTML = `<strong>処理時間:</strong> ${elapsed.toFixed(1)}s`;
+                        if (modelInfo.style.display !== 'none') {
+                            const currentText = modelInfo.textContent;
+                            if (currentText.includes('モデル:')) {
+                                // モデル情報が表示されている場合は何もしない
+                            }
                         }
                     }, 100);
 
@@ -625,16 +604,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         streamingContainer.style.display = 'none';
                     }
 
-                    const tokensPerSec = processingInfo.usage ? (processingInfo.usage.completion_tokens / (processingInfo.processingTime / 1000)).toFixed(2) : 'N/A';
-                    info.innerHTML = `
-                        <p><strong>モデル:</strong> ${processingInfo.model || '不明'}</p>
-                        <p><strong>プロンプトトークン:</strong> ${processingInfo.usage?.prompt_tokens || 'N/A'}</p>
-                        <p><strong>生成トークン:</strong> ${processingInfo.usage?.completion_tokens || 'N/A'}</p>
-                        <p><strong>総トークン:</strong> ${processingInfo.usage?.total_tokens || 'N/A'}</p>
-                        <p><strong>処理時間:</strong> ${processingInfo.processingTime}ms</p>
-                        <p><strong>トークン/秒:</strong> ${tokensPerSec}</p>
-                    `;
-                    infoContainer.style.display = 'block';
+                    // モデル情報を表示
+                    if (processingInfo.model) {
+                        modelInfo.textContent = `モデル: ${processingInfo.model}`;
+                        modelInfo.style.display = 'block';
+                    }
                 } else {
                     const startTime = Date.now();
                     const result = await generateHtmlFromImages(images, isStreaming, null, null, apiUrl);
@@ -647,16 +621,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         processingTime: endTime - startTime
                     };
 
-                    const tokensPerSec = processingInfo.usage ? (processingInfo.usage.completion_tokens / (processingInfo.processingTime / 1000)).toFixed(2) : 'N/A';
-                    info.innerHTML = `
-                        <p><strong>モデル:</strong> ${processingInfo.model || '不明'}</p>
-                        <p><strong>プロンプトトークン:</strong> ${processingInfo.usage?.prompt_tokens || 'N/A'}</p>
-                        <p><strong>生成トークン:</strong> ${processingInfo.usage?.completion_tokens || 'N/A'}</p>
-                        <p><strong>総トークン:</strong> ${processingInfo.usage?.total_tokens || 'N/A'}</p>
-                        <p><strong>処理時間:</strong> ${processingInfo.processingTime}ms</p>
-                        <p><strong>トークン/秒:</strong> ${tokensPerSec}</p>
-                    `;
-                    infoContainer.style.display = 'block';
+                    // モデル情報を表示
+                    if (processingInfo.model) {
+                        modelInfo.textContent = `モデル: ${processingInfo.model}`;
+                        modelInfo.style.display = 'block';
+                    }
                 }
 
                 shadowRoot.innerHTML = generatedHtml;
@@ -678,22 +647,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     streamingOutput.textContent = '';
                     streamingContainer.style.display = 'block';
-                    info.innerHTML = `
-                        <p><strong>モデル:</strong> 読み込み中...</p>
-                        <p><strong>プロンプトトークン:</strong> -</p>
-                        <p><strong>生成トークン:</strong> -</p>
-                        <p><strong>総トークン:</strong> -</p>
-                        <p><strong>処理時間:</strong> 0.0s</p>
-                        <p><strong>トークン/秒:</strong> -</p>
-                    `;
-                    infoContainer.style.display = 'block';
 
                     const startTime = Date.now();
+                    // 経過時間をリアルタイム更新（モデル情報に表示）
                     const updateInterval = setInterval(() => {
                         const elapsed = (Date.now() - startTime) / 1000;
-                        const timeElement = info.querySelector('p:nth-child(5)');
-                        if (timeElement) {
-                            timeElement.innerHTML = `<strong>処理時間:</strong> ${elapsed.toFixed(1)}s`;
+                        if (modelInfo.style.display !== 'none') {
+                            const currentText = modelInfo.textContent;
+                            if (currentText.includes('モデル:')) {
+                                // モデル情報が表示されている場合は何もしない
+                            }
                         }
                     }, 100);
 
@@ -754,16 +717,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         streamingContainer.style.display = 'none';
                     }
 
-                    const tokensPerSec = processingInfo.usage ? (processingInfo.usage.completion_tokens / (processingInfo.processingTime / 1000)).toFixed(2) : 'N/A';
-                    info.innerHTML = `
-                        <p><strong>モデル:</strong> ${processingInfo.model || '不明'}</p>
-                        <p><strong>プロンプトトークン:</strong> ${processingInfo.usage?.prompt_tokens || 'N/A'}</p>
-                        <p><strong>生成トークン:</strong> ${processingInfo.usage?.completion_tokens || 'N/A'}</p>
-                        <p><strong>総トークン:</strong> ${processingInfo.usage?.total_tokens || 'N/A'}</p>
-                        <p><strong>処理時間:</strong> ${processingInfo.processingTime}ms</p>
-                        <p><strong>トークン/秒:</strong> ${tokensPerSec}</p>
-                    `;
-                    infoContainer.style.display = 'block';
+                    // モデル情報を表示
+                    if (processingInfo.model) {
+                        modelInfo.textContent = `モデル: ${processingInfo.model}`;
+                        modelInfo.style.display = 'block';
+                    }
                 } else {
                     const startTime = Date.now();
                     const result = await generateHtmlFromText(extractedTextContent, isStreaming, null, null, apiUrl);
@@ -776,16 +734,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         processingTime: endTime - startTime
                     };
 
-                    const tokensPerSec = processingInfo.usage ? (processingInfo.usage.completion_tokens / (processingInfo.processingTime / 1000)).toFixed(2) : 'N/A';
-                    info.innerHTML = `
-                        <p><strong>モデル:</strong> ${processingInfo.model || '不明'}</p>
-                        <p><strong>プロンプトトークン:</strong> ${processingInfo.usage?.prompt_tokens || 'N/A'}</p>
-                        <p><strong>生成トークン:</strong> ${processingInfo.usage?.completion_tokens || 'N/A'}</p>
-                        <p><strong>総トークン:</strong> ${processingInfo.usage?.total_tokens || 'N/A'}</p>
-                        <p><strong>処理時間:</strong> ${processingInfo.processingTime}ms</p>
-                        <p><strong>トークン/秒:</strong> ${tokensPerSec}</p>
-                    `;
-                    infoContainer.style.display = 'block';
+                    // モデル情報を表示
+                    if (processingInfo.model) {
+                        modelInfo.textContent = `モデル: ${processingInfo.model}`;
+                        modelInfo.style.display = 'block';
+                    }
                 }
 
                 shadowRoot.innerHTML = generatedHtml;

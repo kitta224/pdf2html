@@ -71,6 +71,16 @@ h1 {
     align-items: center;
 }
 
+.model-info {
+    margin: 10px 0;
+    padding: 8px 12px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #495057;
+    text-align: center;
+}
+
 input[type="file"] {
     padding: 12px;
     font-size: 16px; /* モバイルでのズーム防止 */

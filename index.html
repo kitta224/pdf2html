@@ -43,6 +43,7 @@
             <button id="processBtn">処理</button>
             <button id="stopBtn" style="display:none; background-color: #dc3545;">停止</button>
         </div>
+        <div id="modelInfo" class="model-info" style="display:none;"></div>
         <div id="status" class="status" style="display:none;"></div>
         <details id="textContainer" style="display:none;">
             <summary>抽出されたテキスト</summary>
@@ -55,10 +56,6 @@
         <details id="streamingContainer" style="display:none;">
             <summary>AI思考プロセス</summary>
             <div id="streamingOutput" class="streaming-content"></div>
-        </details>
-        <details id="infoContainer" style="display:none;">
-            <summary>処理情報</summary>
-            <div id="info" class="info-content"></div>
         </details>
         <details id="previewContainer" style="display:none;">
             <summary>生成されたHTMLプレビュー</summary>
