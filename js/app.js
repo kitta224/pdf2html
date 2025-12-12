@@ -82,9 +82,7 @@ async function generateHtmlFromImages(images, isStreaming = false, onChunk = nul
     try {
         const response = await fetch(`${apiUrl}/v1/chat/completions`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             mode: 'cors',
             signal: abortSignal, // 中断シグナルを追加
             body: JSON.stringify({
@@ -216,9 +214,7 @@ async function generateHtmlFromText(text, isStreaming = false, onChunk = null, a
     try {
         const response = await fetch(`${apiUrl}/v1/chat/completions`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             mode: 'cors',
             signal: abortSignal, // 中断シグナルを追加
             body: JSON.stringify({
@@ -393,6 +389,7 @@ function showInstallButton() {
 // UI統合
 document.addEventListener('DOMContentLoaded', () => {
     const apiUrlInput = document.getElementById('apiUrl');
+    const apiTokenInput = document.getElementById('apiToken');
     const pdfInput = document.getElementById('pdfInput');
     const streamingToggle = document.getElementById('streamingToggle');
     const visionToggle = document.getElementById('visionToggle');
@@ -495,10 +492,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const isVision = visionToggle.checked;
         const isStreaming = streamingToggle.checked;
         let apiUrl = apiUrlInput.value.trim() || 'http://127.0.0.1:1234';
+        const apiToken = apiTokenInput.value.trim();
 
         // API URLがプロトコルを含まない場合、https://を付ける
         if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
             apiUrl = 'https://' + apiUrl;
+        }
+
+        // Authorizationヘッダーの準備
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (apiToken) {
+            headers['Authorization'] = `Bearer ${apiToken}`;
         }
 
         let hasReasoning = false;
