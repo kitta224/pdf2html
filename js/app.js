@@ -75,7 +75,7 @@ async function convertPDFToImages(file, scale = 2.0) {
  * @param {function} onChunk - チャンク受信時のコールバック（ストリーミング時のみ）
  * @returns {Promise<object>} 生成されたHTMLとメタデータ
  */
-async function generateHtmlFromImages(images, isStreaming = false, onChunk = null, abortSignal = null, apiUrl = 'http://127.0.0.1:1234') {
+async function generateHtmlFromImages(images, isStreaming = false, onChunk = null, abortSignal = null, apiUrl = 'http://127.0.0.1:1234', headers = {}) {
     const systemPrompt = "あなたは専門的なウェブ開発者で、画像からモバイルフレンドリーなHTMLに変換するエキスパートです。レスポンシブデザイン、アクセシビリティ、読みやすさを重視し、構造化されたHTMLを出力します。回答はHTMLコードのみとしてください。画像の内容を分析し、適切なHTML構造に変換してください。モバイル用に最適化するため、収まりきらない物は横にスクロール可能な状態にしてください。絶対に省略しないでください！";
     const userPrompt = "このPDFの画像を分析して、元の内容を維持しつつモバイル最適化されたHTMLに変換してください。";
 
@@ -207,7 +207,7 @@ async function generateHtmlFromImages(images, isStreaming = false, onChunk = nul
  * @param {function} onChunk - チャンク受信時のコールバック（ストリーミング時のみ）
  * @returns {Promise<object>} 生成されたHTMLとメタデータ
  */
-async function generateHtmlFromText(text, isStreaming = false, onChunk = null, abortSignal = null, apiUrl = 'http://127.0.0.1:1234') {
+async function generateHtmlFromText(text, isStreaming = false, onChunk = null, abortSignal = null, apiUrl = 'http://127.0.0.1:1234', headers = {}) {
     const systemPrompt = "あなたはテキストをモバイルフレンドリーなHTMLに変換するエキスパートです。レスポンシブデザイン、アクセシビリティ、読みやすさを重視し、構造化されたHTMLを出力します。注意書きなどは別の色を使用して、回答はHTMLコードのみとしてください。テキストデータから構造を予測して復元し、表組みにすべきところは表組みにしてください。その際モバイル用に最適化するため、収まりきらない物は横にスクロール可能な状態にしてください。ユーザーはHTML化してほしいテキストをのみ提供しますが、余計な空白などが入っている可能性があります。絶対に省略しないでください。";
     const fullPrompt = `${text}`;
 
@@ -584,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
 
                             streamingOutput.scrollTop = streamingOutput.scrollHeight;
-                        }, abortController.signal, apiUrl);
+                        }, abortController.signal, apiUrl, headers);
 
                         clearInterval(updateInterval);
                         abortController = null;
@@ -617,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else {
                     const startTime = Date.now();
-                    const result = await generateHtmlFromImages(images, isStreaming, null, null, apiUrl);
+                    const result = await generateHtmlFromImages(images, isStreaming, null, null, apiUrl, headers);
                     const endTime = Date.now();
 
                     generatedHtml = result.html;
@@ -697,7 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
 
                             streamingOutput.scrollTop = streamingOutput.scrollHeight;
-                        }, abortController.signal, apiUrl);
+                        }, abortController.signal, apiUrl, headers);
 
                         clearInterval(updateInterval);
                         abortController = null;
@@ -730,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else {
                     const startTime = Date.now();
-                    const result = await generateHtmlFromText(extractedTextContent, isStreaming, null, null, apiUrl);
+                    const result = await generateHtmlFromText(extractedTextContent, isStreaming, null, null, apiUrl, headers);
                     const endTime = Date.now();
 
                     generatedHtml = result.html;
